@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Feedback Insight Report — May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:      #F4F6FA;
+  --surface: #FFFFFF;
+  --card:    #FFFFFF;
+  --navy:    #0B2545;
+  --blue:    #1565C0;
+  --sky:     #2196F3;
+  --teal:    #00897B;
+  --red:     #D32F2F;
+  --amber:   #F57F17;
+  --green:   #2E7D32;
+  --lred:    #FFEBEE;
+  --lamber:  #FFFDE7;
+  --lgreen:  #E8F5E9;
+  --lblue:   #E3F2FD;
+  --border:  #E0E6EF;
+  --text:    #1A2332;
+  --muted:   #6B7A90;
+  --mono:    'DM Mono', monospace;
+  --sans:    'DM Sans', 'Noto Sans Thai', sans-serif;
+  --thai:    'Noto Sans Thai', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--thai);font-size:14px;line-height:1.7}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);
+  padding:0 48px;
+  display:flex;align-items:center;gap:4px;
+  overflow-x:auto;white-space:nowrap;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none}
+.nav-brand{
+  font-family:var(--sans);font-size:14px;font-weight:700;
+  color:#fff;margin-right:24px;flex-shrink:0;padding:16px 0;
+  letter-spacing:-0.02em;
+}
+nav a{
+  display:inline-block;padding:16px 14px;
+  color:rgba(255,255,255,0.5);text-decoration:none;
+  font-family:var(--mono);font-size:11px;letter-spacing:0.05em;
+  text-transform:uppercase;border-bottom:2px solid transparent;
+  transition:all 0.2s;
+}
+nav a:hover,nav a.active{color:#fff;border-bottom-color:#64B5F6}
+
+/* LAYOUT */
+.container{max-width:1200px;margin:0 auto;padding:0 48px}
+section{padding:64px 0}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,var(--navy) 0%,#1565C0 100%);
+  padding:72px 0 64px;color:#fff;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+  color:#90CAF9;background:rgba(144,202,249,0.12);
+  border:1px solid rgba(144,202,249,0.25);border-radius:4px;
+  padding:5px 12px;margin-bottom:20px;
+}
+.hero-eyebrow span{width:6px;height:6px;border-radius:50%;background:#64B5F6;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero h1{
+  font-family:var(--sans);font-size:clamp(32px,4vw,52px);font-weight:700;
+  line-height:1.1;letter-spacing:-0.03em;margin-bottom:10px;
+}
+.hero-sub{color:rgba(255,255,255,0.55);font-size:15px;margin-bottom:48px}
+.hero-kpi{display:flex;gap:48px;flex-wrap:wrap}
+.kpi-item{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.04em}
+.kpi-item strong{display:block;font-family:var(--sans);font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.03em;margin-bottom:2px}
+
+/* SECTION HEADERS */
+.sec-eyebrow{font-family:var(--mono);font-size:11px;color:var(--sky);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
+.sec-title{font-family:var(--sans);font-size:clamp(22px,2.5vw,30px);font-weight:700;letter-spacing:-0.02em;color:var(--navy);margin-bottom:36px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px}
+.card-sm{padding:20px 24px}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:32px}
+.stat-box{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:20px 18px;position:relative;overflow:hidden;
+}
+.stat-box::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:2px 2px 0 0}
+.stat-box.s-red::after{background:var(--red)}
+.stat-box.s-amber::after{background:var(--amber)}
+.stat-box.s-green::after{background:var(--teal)}
+.stat-box.s-blue::after{background:var(--sky)}
+.stat-val{font-family:var(--sans);font-size:32px;font-weight:700;letter-spacing:-0.03em;line-height:1;margin-bottom:4px}
+.stat-val.red{color:var(--red)}.stat-val.amber{color:var(--amber)}.stat-val.green{color:var(--teal)}.stat-val.blue{color:var(--sky)}
+.stat-lbl{font-size:12px;color:var(--muted)}
+
+/* CHART GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px}
+@media(max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr}}
+.chart-label{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--navy);margin-bottom:18px}
+
+/* TAGS */
+.tag{display:inline-block;padding:3px 10px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:500;white-space:nowrap}
+.tag-red   {background:var(--lred);  color:var(--red)}
+.tag-amber {background:var(--lamber);color:#B45309}
+.tag-green {background:var(--lgreen);color:var(--green)}
+.tag-blue  {background:var(--lblue); color:var(--blue)}
+.tag-gray  {background:#F0F2F5;color:var(--muted)}
+.tag-teal  {background:#E0F2F1;color:var(--teal)}
+.tag-purple{background:#F3E5F5;color:#6A1B9A}
+
+/* SENTIMENT CARDS */
+.sent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+@media(max-width:700px){.sent-grid{grid-template-columns:1fr}}
+.sent-card{border-radius:12px;padding:24px 22px;border:1px solid var(--border)}
+.sent-card.neg{background:var(--lred);border-color:#FFCDD2}
+.sent-card.neu{background:var(--lamber);border-color:#FFF9C4}
+.sent-card.pos{background:var(--lgreen);border-color:#C8E6C9}
+.sent-big{font-family:var(--sans);font-size:44px;font-weight:700;letter-spacing:-0.04em;line-height:1}
+.sent-card.neg .sent-big{color:var(--red)}
+.sent-card.neu .sent-big{color:var(--amber)}
+.sent-card.pos .sent-big{color:var(--teal)}
+.sent-pct{font-family:var(--mono);font-size:12px;margin:4px 0 14px}
+.sent-card.neg .sent-pct{color:#B71C1C}
+.sent-card.neu .sent-pct{color:#E65100}
+.sent-card.pos .sent-pct{color:#1B5E20}
+.sent-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ISSUES TABLE */
+.issues-wrap{overflow-x:auto}
+.issues-table{width:100%;border-collapse:separate;border-spacing:0 6px}
+.issues-table thead th{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--muted);padding:0 16px 10px;text-align:left;white-space:nowrap
+}
+.irow{background:var(--card);transition:box-shadow 0.2s}
+.irow:hover{box-shadow:0 2px 16px rgba(21,101,192,0.08)}
+.irow td{
+  padding:16px 16px;font-size:13px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.irow td:first-child{border-left:1px solid var(--border);border-radius:8px 0 0 8px}
+.irow td:last-child{border-right:1px solid var(--border);border-radius:0 8px 8px 0}
+.inum{font-family:var(--sans);font-size:20px;font-weight:700;color:#D0DAE8}
+.iname{font-weight:600;font-size:14px;color:var(--navy)}
+.isub{font-size:11px;color:var(--muted);margin-top:2px}
+.icount{font-family:var(--sans);font-size:22px;font-weight:700;color:var(--navy)}
+.ipct{font-size:11px;color:var(--muted)}
+.ibar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.ibar-fill{height:100%;border-radius:2px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.ibar-fill.red   {background:linear-gradient(90deg,var(--red),#EF9A9A)}
+.ibar-fill.amber {background:linear-gradient(90deg,var(--amber),#FFE082)}
+.ibar-fill.blue  {background:linear-gradient(90deg,var(--sky),#90CAF9)}
+.ibar-fill.teal  {background:linear-gradient(90deg,var(--teal),#80CBC4)}
+.ibar-fill.purple{background:linear-gradient(90deg,#7B1FA2,#CE93D8)}
+
+/* RISK */
+.risk-list{display:flex;flex-direction:column;gap:10px}
+.risk-item{
+  display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:start;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;
+}
+.risk-badge{padding:5px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;text-align:center;white-space:nowrap}
+.rb-crit{background:var(--lred);color:var(--red);border:1px solid #FFCDD2}
+.rb-watch{background:var(--lamber);color:#B45309;border:1px solid #FFF9C4}
+.rb-mon{background:var(--lgreen);color:var(--green);border:1px solid #C8E6C9}
+.risk-name{font-weight:600;font-size:14px;color:var(--navy);margin-bottom:3px}
+.risk-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ACTIONS */
+.action-list{display:flex;flex-direction:column;gap:8px}
+.action-item{
+  display:grid;grid-template-columns:110px 180px 1fr 90px 100px;
+  gap:14px;align-items:center;
+  background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;
+  transition:border-color 0.15s;
+}
+.action-item:hover{border-color:#90CAF9}
+@media(max-width:900px){.action-item{grid-template-columns:1fr 1fr}}
+.team-tag{padding:4px 10px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;text-align:center;white-space:nowrap}
+.t-gd    {background:#E3F2FD;color:var(--blue)}
+.t-qa    {background:var(--lred);color:var(--red)}
+.t-prod  {background:#E0F2F1;color:var(--teal)}
+.t-mkt   {background:var(--lamber);color:#B45309}
+.t-comm  {background:#F3E5F5;color:#6A1B9A}
+.action-name{font-weight:600;font-size:13px;color:var(--navy)}
+.action-detail{font-size:12px;color:var(--muted)}
+.action-tl{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
+
+/* QUOTES */
+.quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.quote-grid{grid-template-columns:1fr}}
+.quote-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:18px 20px;border-left:3px solid var(--sky);
+}
+.quote-text{font-size:13px;color:var(--navy);margin-bottom:12px;line-height:1.7;font-style:italic}
+.quote-meta{display:flex;gap:6px;flex-wrap:wrap}
+
+/* WORKFLOW */
+.wf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.wf-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 18px}
+.wf-num{font-family:var(--mono);font-size:10px;color:var(--sky);margin-bottom:8px;letter-spacing:0.1em}
+.wf-name{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.wf-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* RULES BOX */
+.rules-box{background:var(--lblue);border:1px solid #BBDEFB;border-radius:10px;padding:20px 24px}
+.rules-title{font-family:var(--sans);font-weight:600;font-size:13px;color:var(--blue);margin-bottom:12px}
+.rule-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:13px}
+.rule-row:last-child{margin-bottom:0}
+
+/* DONUT WRAP */
+.donut-wrap{display:flex;align-items:center;gap:28px}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:9px}
+.leg-item{display:flex;align-items:center;gap:9px;font-size:13px}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.leg-lbl{flex:1;color:var(--muted)}
+.leg-val{font-family:var(--mono);font-weight:600;font-size:13px}
+
+/* FADE IN */
+.fi{opacity:0;transform:translateY(20px);transition:opacity 0.55s,transform 0.55s}
+.fi.vis{opacity:1;transform:translateY(0)}
+
+/* FOOTER */
+footer{background:var(--navy);padding:36px 0;text-align:center;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.04em}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:0}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">Feedback Report</span>
+  <a href="#overview">Overview</a>
+  <a href="#issues">Top Issues</a>
+  <a href="#sentiment">Sentiment</a>
+  <a href="#actions">Actions</a>
+  <a href="#risk">Risk</a>
+  <a href="#appendix">Quotes</a>
+  <a href="#workflow">Workflow</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-eyebrow"><span></span>Player Feedback Analysis</div>
+    <h1>Player Feedback<br>Insight Report</h1>
+    <p class="hero-sub">พฤษภาคม 2026  ·  300 feedback records  ·  8 player segments</p>
+    <div class="hero-kpi">
+      <div class="kpi-item"><strong>300</strong>Total Feedback</div>
+      <div class="kpi-item"><strong>7</strong>แหล่งข้อมูล</div>
+      <div class="kpi-item"><strong>48.0%</strong>Positive</div>
+      <div class="kpi-item"><strong>49.3%</strong>Neutral</div>
+      <div class="kpi-item"><strong>85</strong>High Priority</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- OVERVIEW -->
+<!-- ══════════════════════════════════════ -->
+<section id="overview">
+<div class="container">
+  <div class="sec-eyebrow">01 — Executive Summary & Overview</div>
+  <div class="sec-title">ภาพรวม Feedback</div>
+
+  <!-- Stat boxes -->
+  <div class="stat-row fi">
+    <div class="stat-box s-blue"><div class="stat-val blue">300</div><div class="stat-lbl">Total Feedback</div></div>
+    <div class="stat-box s-red"><div class="stat-val red">8</div><div class="stat-lbl">Negative (2.7%)</div></div>
+    <div class="stat-box s-amber"><div class="stat-val amber">148</div><div class="stat-lbl">Neutral (49.3%)</div></div>
+    <div class="stat-box s-green"><div class="stat-val green">144</div><div class="stat-lbl">Positive (48.0%)</div></div>
+    <div class="stat-box s-red"><div class="stat-val red">85</div><div class="stat-lbl">High Priority</div></div>
+    <div class="stat-box s-amber"><div class="stat-val amber">166</div><div class="stat-lbl">Medium Priority</div></div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="grid-2 fi">
+    <div class="card">
+      <div class="chart-label">Category Distribution</div>
+      <canvas id="catChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="chart-label">Sentiment Breakdown</div>
+      <div class="donut-wrap">
+        <canvas id="sentDonut" width="175" height="175" style="flex-shrink:0"></canvas>
+        <div class="donut-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#D32F2F"></div><span class="leg-lbl">Negative</span><span class="leg-val" style="color:#D32F2F">8</span></div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F57F17"></div><span class="leg-lbl">Neutral</span><span class="leg-val" style="color:#F57F17">148</span></div>
+          <div class="leg-item"><div class="leg-dot" style="background:#00897B"></div><span class="leg-lbl">Positive</span><span class="leg-val" style="color:#00897B">144</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="grid-2 fi">
+    <div class="card">
+      <div class="chart-label">Priority Distribution</div>
+      <canvas id="priChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="chart-label">Suggested Owner</div>
+      <canvas id="ownerChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- Charts row 3 -->
+  <div class="grid-2 fi">
+    <div class="card">
+      <div class="chart-label">แหล่งที่มา Feedback (Source)</div>
+      <canvas id="sourceChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="chart-label">Platform Distribution</div>
+      <canvas id="platChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <!-- Sentiment rules box -->
+  <div class="rules-box fi">
+    <div class="rules-title">📋 Sentiment & Priority Rules ที่ใช้วิเคราะห์</div>
+    <div class="rule-row"><span class="tag tag-amber" style="flex-shrink:0">Neutral</span><span>มีคำว่า <strong>"รบกวนช่วยดูให้หน่อย"</strong> — มี priority สูงสุด ชนะ rule อื่น</span></div>
+    <div class="rule-row"><span class="tag tag-green" style="flex-shrink:0">Positive</span><span>มีคำแนะนำ <strong>"อยากให้" / "ควรมี" / "ถ้าแก้ได้จะดีมาก"</strong> (ไม่มีคำว่า รบกวน)</span></div>
+    <div class="rule-row"><span class="tag tag-green" style="flex-shrink:0">Positive</span><span>มีคำว่า <strong>"ขอบคุณ"</strong> หรือ category = Positive Feedback</span></div>
+    <div class="rule-row"><span class="tag tag-red" style="flex-shrink:0">Negative</span><span>มีคำอารมณ์ชัดเจน เช่น <strong>ท้อ / ไม่แฟร์ / pay to win / ผิดหวัง / เลิกเล่น</strong></span></div>
+    <div class="rule-row"><span class="tag tag-red" style="flex-shrink:0">High Priority</span><span>Bug/Technical + Account/Payment หรือมีคำว่า <strong>"เพราะกระทบการเล่นพอสมควร"</strong></span></div>
+    <div class="rule-row"><span class="tag tag-green" style="flex-shrink:0">Low Priority</span><span>Event Feedback + Positive Feedback</span></div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- TOP ISSUES -->
+<!-- ══════════════════════════════════════ -->
+<section id="issues">
+<div class="container">
+  <div class="sec-eyebrow">02 — Top Issues</div>
+  <div class="sec-title">ปัญหาที่เจอบ่อยที่สุด</div>
+
+  <div class="card fi" style="margin-bottom:24px">
+    <div class="chart-label">Top Issues — Volume Comparison</div>
+    <canvas id="issueRadar" height="200"></canvas>
+  </div>
+
+  <div class="issues-wrap fi">
+    <table class="issues-table">
+      <thead><tr>
+        <th>#</th><th>Issue</th><th>Count</th>
+        <th>Pattern / Root Cause</th><th>Impact</th><th>Owner</th><th>Priority</th>
+      </tr></thead>
+      <tbody>
+        <tr class="irow">
+          <td><div class="inum">01</div></td>
+          <td><div class="iname">Gameplay / Balance</div><div class="isub">บอส-PvP ไม่สมดุล</div><div class="ibar"><div class="ibar-fill red" data-w="69"></div></div></td>
+          <td><div class="icount">69</div><div class="ipct">23% of total</div></td>
+          <td style="font-size:12px;color:var(--muted)">บอสใหม่ one-shot บ่อย · ตัวละครบางตัว OP ใน Arena · PvP meta แคบ · ฮีลอ่อน<br><span style="color:var(--red)">→ ขาด playtesting ก่อน release</span></td>
+          <td style="font-size:12px;color:var(--muted)">F2P + New Player รู้สึกไม่ยุติธรรม ลด engagement</td>
+          <td><span class="tag tag-blue">Game Design</span></td>
+          <td><span class="tag tag-amber">Medium</span></td>
+        </tr>
+        <tr class="irow">
+          <td><div class="inum">02</div></td>
+          <td><div class="iname">Reward / Economy</div><div class="isub">ทรัพยากรไม่เพียงพอ</div><div class="ibar"><div class="ibar-fill amber" data-w="42"></div></div></td>
+          <td><div class="icount">42</div><div class="ipct">14% of total</div></td>
+          <td style="font-size:12px;color:var(--muted)">ทองขาดตลอด · เควสต์สัปดาห์แต้มน้อย · ของ upgrade หายาก<br><span style="color:var(--red)">→ Economy gate เพื่อ push monetization</span></td>
+          <td style="font-size:12px;color:var(--muted)">F2P + Casual ตามไม่ทัน เสี่ยง churn สูง</td>
+          <td><span class="tag tag-blue">Game Design</span></td>
+          <td><span class="tag tag-amber">Medium</span></td>
+        </tr>
+        <tr class="irow">
+          <td><div class="inum">03</div></td>
+          <td><div class="iname">UX / UI</div><div class="isub">ประสบการณ์ใช้งานยาก</div><div class="ibar"><div class="ibar-fill blue" data-w="39"></div></div></td>
+          <td><div class="icount">39</div><div class="ipct">13% of total</div></td>
+          <td style="font-size:12px;color:var(--muted)">Font เล็ก · Back button พา user ออก · Notification fatigue · Tutorial เร็วเกิน<br><span style="color:var(--red)">→ UI design สำหรับ PC ไม่ได้ test จอเล็ก</span></td>
+          <td style="font-size:12px;color:var(--muted)">New Player + Casual สับสน ลด retention ช่วงแรก</td>
+          <td><span class="tag tag-teal">Product/QA</span></td>
+          <td><span class="tag tag-amber">Medium</span></td>
+        </tr>
+        <tr class="irow">
+          <td><div class="inum">04</div></td>
+          <td><div class="iname">Gacha / Monetization</div><div class="isub">ระบบไม่โปร่งใส</div><div class="ibar"><div class="ibar-fill purple" data-w="35"></div></div></td>
+          <td><div class="icount">35</div><div class="ipct">12% of total</div></td>
+          <td style="font-size:12px;color:var(--muted)">Pity อ่านแล้วงง · Banner ออกถี่เกิน · ไม่มี preview ก่อน<br><span style="color:var(--red)">→ Gacha UX ไม่ถูก design ให้ friendly</span></td>
+          <td style="font-size:12px;color:var(--muted)">Mid Spender + Whale เชื่อมั่นลด เสี่ยงต่อ revenue</td>
+          <td><span class="tag tag-blue">Game Design</span></td>
+          <td><span class="tag tag-amber">Medium</span></td>
+        </tr>
+        <tr class="irow">
+          <td><div class="inum">05</div></td>
+          <td><div class="iname">Bug / Technical Issue</div><div class="isub">ปัญหาเทคนิคกระทบการเล่น</div><div class="ibar"><div class="ibar-fill red" data-w="31"></div></div></td>
+          <td><div class="icount">31</div><div class="ipct">10% of total</div></td>
+          <td style="font-size:12px;color:var(--muted)">เกมแลค / เฟรมตก · เสียงหายหลัง battle · Patch โหลดช้า · Display เพี้ยนจอเล็ก<br><span style="color:var(--red)">→ QA ไม่ครอบคลุม device range</span></td>
+          <td style="font-size:12px;color:var(--muted)">Session ถูกตัดกลางคัน · Whale + Guild Leader เสีย UX</td>
+          <td><span class="tag tag-red">QA</span></td>
+          <td><span class="tag tag-red">High</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SENTIMENT -->
+<!-- ══════════════════════════════════════ -->
+<section id="sentiment">
+<div class="container">
+  <div class="sec-eyebrow">03 — Sentiment Summary</div>
+  <div class="sec-title">อารมณ์และท่าทีของผู้เล่น</div>
+
+  <div class="sent-grid fi">
+    <div class="sent-card neg">
+      <div class="sent-big">8</div>
+      <div class="sent-pct">2.7% — Negative</div>
+      <div class="sent-desc">มีคำอารมณ์ชัดเจน เช่น ท้อ / ไม่แฟร์ / pay to win ส่วนใหญ่มาจาก Gacha ที่โรลไม่ได้ rate-up</div>
+    </div>
+    <div class="sent-card neu">
+      <div class="sent-big">148</div>
+      <div class="sent-pct">49.3% — Neutral</div>
+      <div class="sent-desc">มีคำว่า "รบกวนช่วยดูให้หน่อย" หรือรายงานปัญหาตรงๆ ไม่มีอารมณ์ · Guild Leader + Mid Spender สัดส่วนสูง</div>
+    </div>
+    <div class="sent-card pos">
+      <div class="sent-big">144</div>
+      <div class="sent-pct">48.0% — Positive</div>
+      <div class="sent-desc">มีคำแนะนำ / "ขอบคุณ" / ชื่นชม · Returning Player + Whale มีสัดส่วนสูง · มาจาก App/Play Store Review</div>
+    </div>
+  </div>
+
+  <div class="grid-2 fi">
+    <div class="card">
+      <div class="chart-label">Sentiment by Player Segment</div>
+      <canvas id="segChart" height="230"></canvas>
+    </div>
+    <div class="card">
+      <div class="chart-label">Category × Sentiment Heatmap</div>
+      <canvas id="catSentChart" height="230"></canvas>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ACTIONS -->
+<!-- ══════════════════════════════════════ -->
+<section id="actions">
+<div class="container">
+  <div class="sec-eyebrow">04 — Recommended Actions</div>
+  <div class="sec-title">แผนดำเนินการแยกตามทีม</div>
+
+  <div class="action-list fi">
+    <div class="action-item"><span class="team-tag t-qa">QA</span><span class="action-name">Hotfix critical bugs</span><span class="action-detail">แก้เสียงหายหลัง battle · Display เพี้ยนจอเล็ก · Loading patch ช้า</span><span class="tag tag-red">High</span><span class="action-tl">ทันที</span></div>
+    <div class="action-item"><span class="team-tag t-gd">Game Design</span><span class="action-name">Rebalance characters & boss</span><span class="action-detail">ปรับตัวละคร OP ใน Arena · ลด one-shot boss · Buff healer</span><span class="tag tag-red">High</span><span class="action-tl">2 สัปดาห์</span></div>
+    <div class="action-item"><span class="team-tag t-gd">Game Design</span><span class="action-name">Fix economy / reward gap</span><span class="action-detail">เพิ่ม daily reward 15-20% · ลด material cost · เพิ่ม drop rate</span><span class="tag tag-red">High</span><span class="action-tl">1 Sprint</span></div>
+    <div class="action-item"><span class="team-tag t-gd">Game Design</span><span class="action-name">Improve gacha transparency</span><span class="action-detail">Pity counter บน banner · Soft pity ชัดเจน · Preview character</span><span class="tag tag-amber">Medium</span><span class="action-tl">1 เดือน</span></div>
+    <div class="action-item"><span class="team-tag t-prod">Product</span><span class="action-name">Fix UX issues</span><span class="action-detail">Font size · Back button navigation · Notification tier</span><span class="tag tag-amber">Medium</span><span class="action-tl">1 Sprint</span></div>
+    <div class="action-item"><span class="team-tag t-prod">Product</span><span class="action-name">Redesign Tutorial</span><span class="action-detail">Tutorial เป็น step สั้น · Replay ได้ · ซ่อน advanced feature ช่วงแรก</span><span class="tag tag-amber">Medium</span><span class="action-tl">1 เดือน</span></div>
+    <div class="action-item"><span class="team-tag t-qa">QA</span><span class="action-name">Expand device test coverage</span><span class="action-detail">Test matrix สำหรับ low-end · Automated regression · Beta test ก่อน patch</span><span class="tag tag-amber">Medium</span><span class="action-tl">2 เดือน</span></div>
+    <div class="action-item"><span class="team-tag t-mkt">Marketing</span><span class="action-name">Rebalance event design</span><span class="action-detail">ลด grind 30% · Event calendar ล่วงหน้า · ปรับ ranking ให้ F2P แข่งได้</span><span class="tag tag-green">Low</span><span class="action-tl">2 เดือน</span></div>
+    <div class="action-item"><span class="team-tag t-comm">Community</span><span class="action-name">Amplify positive momentum</span><span class="action-detail">Highlight feedback ดี · Thank you event · ตอบ review</span><span class="tag tag-green">Low</span><span class="action-tl">ต่อเนื่อง</span></div>
+  </div>
+
+  <div class="card fi" style="margin-top:20px">
+    <div class="chart-label">Action Priority by Team</div>
+    <canvas id="actionChart" height="140"></canvas>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- RISK -->
+<!-- ══════════════════════════════════════ -->
+<section id="risk">
+<div class="container">
+  <div class="sec-eyebrow">05 — Risk / Things to Watch</div>
+  <div class="sec-title">ความเสี่ยงถ้าไม่แก้ไข</div>
+
+  <div class="risk-list fi">
+    <div class="risk-item"><div><div class="risk-badge rb-crit">Critical</div></div><div><div class="risk-name">Pay-to-win perception ลุกลาม</div><div class="risk-desc">F2P + Casual เชื่อว่าเกมไม่แฟร์ → churn สูง → ฐานผู้เล่นหดตัว → รายได้ระยะยาวลดลงแม้ Whale ยังอยู่</div></div></div>
+    <div class="risk-item"><div><div class="risk-badge rb-crit">Critical</div></div><div><div class="risk-name">Bug สะสมทำ session drop</div><div class="risk-desc">Lag + เสียงหาย + display เพี้ยน → ผู้เล่นหยุดเล่นกลางเกม → DAU และ session length ลดลงอย่างต่อเนื่อง</div></div></div>
+    <div class="risk-item"><div><div class="risk-badge rb-watch">Watch</div></div><div><div class="risk-name">Gacha trust eroding</div><div class="risk-desc">Pity ไม่โปร่งใส + banner ถี่ → Mid Spender + Whale รู้สึก "ไม่คุ้ม" → ยอด gacha revenue ลดลงระยะยาว</div></div></div>
+    <div class="risk-item"><div><div class="risk-badge rb-watch">Watch</div></div><div><div class="risk-name">New Player retention ต่ำ</div><div class="risk-desc">Tutorial เร็ว + ด่านยาก + reward น้อย → New Player drop ใน first week สูง → user base ไม่เติบโต</div></div></div>
+    <div class="risk-item"><div><div class="risk-badge rb-mon">Monitor</div></div><div><div class="risk-name">Event fatigue</div><div class="risk-desc">ภารกิจซ้ำ + grind เยอะ → participation ลดลง → ลงทุน event แต่ได้ engagement คืนน้อย</div></div></div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- QUOTES / APPENDIX -->
+<!-- ══════════════════════════════════════ -->
+<section id="appendix">
+<div class="container">
+  <div class="sec-eyebrow">06 — Appendix</div>
+  <div class="sec-title">ตัวอย่าง Feedback อ้างอิง</div>
+
+  <div class="quote-grid fi">
+    <div class="quote-card"><div class="quote-text">"บอสใหม่มีสกิล one shot บ่อยเกิน รู้สึกไม่แฟร์"</div><div class="quote-meta"><span class="tag tag-blue">Gameplay</span><span class="tag tag-gray">FB-003, FB-024, FB-085</span><span class="tag tag-amber">Mid Spender</span></div></div>
+    <div class="quote-card"><div class="quote-text">"ทองในเกมขาดตลอด อัปเกรดตัวละครแทบไม่พอ"</div><div class="quote-meta"><span class="tag tag-blue">Economy</span><span class="tag tag-gray">FB-071, FB-092, FB-220</span><span class="tag tag-amber">Whale, Casual</span></div></div>
+    <div class="quote-card"><div class="quote-text">"ตัวหนังสือในหน้ารายละเอียดสกิลเล็ก อ่านยากบนมือถือ"</div><div class="quote-meta"><span class="tag tag-teal">UX/UI</span><span class="tag tag-gray">FB-010, FB-086, FB-171</span><span class="tag tag-amber">New Player</span></div></div>
+    <div class="quote-card"><div class="quote-text">"เปิดกาชาไปหลายสิบโรลแล้วยังไม่ได้ตัว rate up รู้สึกท้อมาก"</div><div class="quote-meta"><span class="tag tag-purple">Gacha</span><span class="tag tag-gray">FB-001, FB-055, FB-134</span><span class="tag tag-amber">Guild Leader</span></div></div>
+    <div class="quote-card"><div class="quote-text">"เกมแลคมากในด่านบอสใหม่ เฟรมตกจนกดหลบไม่ทัน"</div><div class="quote-meta"><span class="tag tag-red">Bug</span><span class="tag tag-gray">FB-069, FB-082, FB-147</span><span class="tag tag-amber">All segments</span></div></div>
+    <div class="quote-card"><div class="quote-text">"เควสต์รายสัปดาห์ให้แต้มไม่พอแลกของหลัก"</div><div class="quote-meta"><span class="tag tag-blue">Reward</span><span class="tag tag-gray">FB-006, FB-056, FB-090</span><span class="tag tag-amber">F2P, Guild Leader</span></div></div>
+    <div class="quote-card"><div class="quote-text">"อยากให้ pity ชัดเจนกว่านี้ ตอนนี้อ่านเงื่อนไขแล้วงง"</div><div class="quote-meta"><span class="tag tag-purple">Gacha</span><span class="tag tag-gray">FB-036, FB-063, FB-115</span><span class="tag tag-green">Positive Rule</span></div></div>
+    <div class="quote-card"><div class="quote-text">"UI ใหม่ดูสะอาดขึ้น เข้าใจง่ายกว่าเดิม ขอบคุณครับ"</div><div class="quote-meta"><span class="tag tag-teal">Positive</span><span class="tag tag-gray">FB-016, FB-076, FB-170</span><span class="tag tag-green">ขอบคุณ Rule</span></div></div>
+  </div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- WORKFLOW -->
+<!-- ══════════════════════════════════════ -->
+<section id="workflow">
+<div class="container">
+  <div class="sec-eyebrow">07 — Workflow Note</div>
+  <div class="sec-title">AI Workflow ที่ใช้วิเคราะห์</div>
+
+  <div class="wf-grid fi">
+    <div class="wf-card"><div class="wf-num">STEP 01</div><div class="wf-name">Data Preparation</div><div class="wf-desc">Extract 300 rows จาก Excel ด้วย Python — ตรวจ Missing Values, แปลง date serial → YYYY-MM-DD, จัด columns ตาม Data Dictionary</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 02</div><div class="wf-name">AI Classification</div><div class="wf-desc">วิเคราะห์ทุก 300 feedback — สร้าง sentiment, category, priority, ai_summary, suggested_owner โดย rule-based + AI inference</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 03</div><div class="wf-name">Sentiment Rules</div><div class="wf-desc">รบกวน = Neutral · อยากให้/ควรมี/ถ้าแก้ได้ = Positive · ขอบคุณ = Positive · อารมณ์ชัดเจน = Negative</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 04</div><div class="wf-name">Priority Rules</div><div class="wf-desc">High = Bug + Account/Payment + เพราะกระทบการเล่น · Low = Event + Positive Feedback · Medium = ที่เหลือ</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 05</div><div class="wf-name">game_area Inference</div><div class="wf-desc">AI เติม 99 rows ที่ว่าง โดย keyword matching จากเนื้อหา feedback — แสดงสีม่วงแยกจาก Dataset เดิม</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 06</div><div class="wf-name">Insight Generation</div><div class="wf-desc">วิเคราะห์ pattern — สรุป Top Issues, Root Cause, Impact, Recommended Actions แยกตามทีม</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 07</div><div class="wf-name">Human Review</div><div class="wf-desc">ตรวจสอบ AI output และเพิ่ม review_note ในคอลัมน์ Human Review — สุ่มตรวจ >10% (30+ รายการ)</div></div>
+    <div class="wf-card"><div class="wf-num">STEP 08</div><div class="wf-name">Report Output</div><div class="wf-desc">สร้าง Short Report (.docx + .html) และ Insight Summary (.xlsx) ครบ 8 sections ตาม template ที่กำหนด</div></div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <div class="container">
+    Player Feedback Insight Report · May 2026 · Confidential — Internal Use Only
+  </div>
+</footer>
+
+<script>
+// ── Chart defaults ───────────────────────────────────────
+Chart.defaults.color = '#6B7A90';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const RED='#D32F2F',AMBER='#F57F17',GREEN='#00897B',BLUE='#1565C0',
+      SKY='#2196F3',TEAL='#00897B',PURPLE='#7B1FA2',
+      LRED='rgba(211,47,47,0.12)',LAMBER='rgba(245,127,23,0.12)',LGREEN='rgba(0,137,123,0.12)';
+
+// ── 1. Category horizontal bar ───────────────────────────
+new Chart(document.getElementById('catChart'),{
+  type:'bar',
+  data:{
+    labels:['Gameplay / Balance','Reward / Economy','UX / UI','Event Feedback','Gacha / Monetization','Bug / Technical Issue','Positive Feedback','Content Request','Account / Payment'],
+    datasets:[{
+      data:[69,42,39,36,35,31,22,21,5],
+      backgroundColor:['#D32F2F','#F57F17','#1565C0','#2196F3','#7B1FA2','#D32F2F','#00897B','#00897B','#F57F17'],
+      borderRadius:5,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}},
+      y:{grid:{display:false},ticks:{color:'#1A2332',font:{size:11}}}
+    }
+  }
+});
+
+// ── 2. Sentiment donut ───────────────────────────────────
+new Chart(document.getElementById('sentDonut'),{
+  type:'doughnut',
+  data:{
+    labels:['Negative','Neutral','Positive'],
+    datasets:[{
+      data:[8,148,144],
+      backgroundColor:[RED,AMBER,GREEN],
+      borderColor:'#FFFFFF',borderWidth:3,hoverOffset:6,
+    }]
+  },
+  options:{
+    cutout:'65%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${((ctx.raw/300)*100).toFixed(1)}%)`}}
+    }
+  }
+});
+
+// ── 3. Priority bar ──────────────────────────────────────
+new Chart(document.getElementById('priChart'),{
+  type:'bar',
+  data:{
+    labels:['High','Medium','Low'],
+    datasets:[{
+      data:[85,166,49],
+      backgroundColor:[RED,AMBER,GREEN],
+      borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#1A2332'}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}}
+    }
+  }
+});
+
+// ── 4. Owner bar ─────────────────────────────────────────
+new Chart(document.getElementById('ownerChart'),{
+  type:'bar',
+  data:{
+    labels:['Game Design','QA','Marketing','Product','Community'],
+    datasets:[{
+      data:[131,51,51,45,22],
+      backgroundColor:[SKY,RED,AMBER,GREEN,PURPLE],
+      borderRadius:8,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#1A2332'}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}}
+    }
+  }
+});
+
+// ── 5. Source bar ────────────────────────────────────────
+new Chart(document.getElementById('sourceChart'),{
+  type:'bar',
+  data:{
+    labels:['App Store Review','Play Store Review','Discord','Customer Support','Community Post','In-game Survey','Facebook Comment','Google Form'],
+    datasets:[{
+      data:[42,42,39,39,37,36,33,32],
+      backgroundColor:'rgba(33,150,243,0.7)',
+      hoverBackgroundColor:SKY,
+      borderRadius:5,borderSkipped:false,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#1A2332',maxRotation:25,font:{size:10}}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}}
+    }
+  }
+});
+
+// ── 6. Platform doughnut ─────────────────────────────────
+new Chart(document.getElementById('platChart'),{
+  type:'doughnut',
+  data:{
+    labels:['PC Emulator','Android','iOS'],
+    datasets:[{
+      data:[119,93,88],
+      backgroundColor:[BLUE,GREEN,SKY],
+      borderColor:'#FFFFFF',borderWidth:3,hoverOffset:5,
+    }]
+  },
+  options:{
+    cutout:'60%',
+    plugins:{
+      legend:{position:'right',labels:{color:'#1A2332',padding:16,boxWidth:12}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${((ctx.raw/300)*100).toFixed(1)}%)`}}
+    }
+  }
+});
+
+// ── 7. Issue radar ───────────────────────────────────────
+new Chart(document.getElementById('issueRadar'),{
+  type:'radar',
+  data:{
+    labels:['Gameplay/Balance','Reward/Economy','UX/UI','Event Feedback','Gacha/Monetization','Bug/Technical','Positive Feedback','Content Request'],
+    datasets:[{
+      label:'Volume',data:[69,42,39,36,35,31,22,21],
+      fill:true,
+      backgroundColor:'rgba(21,101,192,0.1)',
+      borderColor:BLUE,borderWidth:2,
+      pointBackgroundColor:SKY,pointRadius:5,
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{display:false}},
+    scales:{
+      r:{
+        grid:{color:'rgba(0,0,0,0.07)'},
+        angleLines:{color:'rgba(0,0,0,0.07)'},
+        pointLabels:{color:'#1A2332',font:{size:11}},
+        ticks:{backdropColor:'transparent',color:'#6B7A90',stepSize:20},
+        min:0,max:80,
+      }
+    }
+  }
+});
+
+// ── 8. Segment sentiment stacked bar ────────────────────
+new Chart(document.getElementById('segChart'),{
+  type:'bar',
+  data:{
+    labels:['F2P','New Player','Casual','Light Spender','Mid Spender','Returning','Guild Leader','Whale'],
+    datasets:[
+      {label:'Negative',data:[0,3,1,2,1,0,1,0],backgroundColor:RED,borderRadius:3},
+      {label:'Neutral', data:[22,19,16,15,17,14,23,22],backgroundColor:AMBER,borderRadius:3},
+      {label:'Positive',data:[25,11,17,19,15,20,18,19],backgroundColor:GREEN,borderRadius:3},
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:'#1A2332',boxWidth:12,padding:14}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},ticks:{color:'#1A2332',font:{size:10}}},
+      y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}}
+    }
+  }
+});
+
+// ── 9. Category × Sentiment grouped bar ─────────────────
+new Chart(document.getElementById('catSentChart'),{
+  type:'bar',
+  data:{
+    labels:['Gameplay','Reward','UX/UI','Event','Gacha','Bug','Positive\nFeedback','Content\nReq','Account'],
+    datasets:[
+      {label:'Negative',data:[3,0,0,0,5,0,0,0,0],backgroundColor:RED,borderRadius:3},
+      {label:'Neutral', data:[33,26,26,18,12,19,4,7,3],backgroundColor:AMBER,borderRadius:3},
+      {label:'Positive',data:[33,16,13,18,18,12,18,14,2],backgroundColor:GREEN,borderRadius:3},
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:'#1A2332',boxWidth:12,padding:14}}},
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#1A2332',font:{size:10}}},
+      y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90'}}
+    }
+  }
+});
+
+// ── 10. Action priority by team ──────────────────────────
+new Chart(document.getElementById('actionChart'),{
+  type:'bar',
+  data:{
+    labels:['Game Design','QA','Product','Marketing','Community'],
+    datasets:[
+      {label:'High',  data:[2,1,0,0,0],backgroundColor:RED,borderRadius:4},
+      {label:'Medium',data:[1,1,2,0,0],backgroundColor:AMBER,borderRadius:4},
+      {label:'Low',   data:[0,0,0,1,1],backgroundColor:GREEN,borderRadius:4},
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:'#1A2332',boxWidth:12,padding:14}}},
+    scales:{
+      x:{stacked:true,grid:{display:false},ticks:{color:'#1A2332'}},
+      y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#6B7A90',stepSize:1}}
+    }
+  }
+});
+
+// ── Scroll fade-in ───────────────────────────────────────
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('vis');
+      e.target.querySelectorAll('.ibar-fill').forEach(b=>{
+        setTimeout(()=>{b.style.width=(parseInt(b.dataset.w)/69*100)+'%'},400);
+      });
+    }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+// ── Nav active ───────────────────────────────────────────
+const secs=document.querySelectorAll('section[id]');
+const links=document.querySelectorAll('nav a[href^="#"]');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-120)cur=s.id});
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+},{passive:true});
+</script>
+</body>
+</html>
